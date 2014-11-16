@@ -1,0 +1,33 @@
+{
+  "name": "raml-cop",
+  "version": "0.0.0",
+  "description": "Command line RAML validator",
+  "keywords": [
+    "raml",
+    "validate",
+    "validator",
+    "cli"
+  ],
+  "author": "Ethan Zimmerman <thebinarypenguin@gmail.com> (http://thebinarypenguin.com)",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/thebinarypenguin/raml-cop"
+  },
+  "bugs": "http://github.com/thebinarypenguin/raml-cop/issues",
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://raw.github.com/thebinarypenguin/raml-cop/master/LICENSE"
+    }
+  ],
+  "bin": {
+    "raml-cop": "./src/raml-cop.js"
+  },
+  "dependencies": {
+    "async": "~0.9.0",
+    "commander": "~2.5.0",
+    "colors": "~1.0.3",
+    "raml-parser": "~0.8.7"
+  },
+  "private": false
+}
