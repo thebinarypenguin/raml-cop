@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+"use strict";
+
 var async     = require('async');
 var commander = require('commander');
 var colors    = require('colors');
@@ -57,7 +59,7 @@ async.eachSeries(commander.args, function(file, callback) {
     parseSuccess(file, data, callback);
   }, function(err) {
     parseFailure(file, err, callback);
-  })
+  });
 }, function(err) {
   // err is not used and should always be undefined.
   // Any parse errors are handled completely by parseFailure()
