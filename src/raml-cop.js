@@ -4,68 +4,62 @@
 
 var async     = require('async');
 var commander = require('commander');
-var colors    = require('colors');
 var raml      = require('raml-parser');
+var utils     = require('./lib/utils.js');
+var reporter  = require('./lib/reporter.js');
 var pkg       = require('../package.json');
 
-// If the --json flag is specified, parsed data is collected and only output if every file is valid
-var collectedData = [];
-var allValid      = true;
 
-// Handle successful parsing of RAML file
-var parseSuccess = function(file, data, callback) {
+// Read STDIN into a string
+utils.readStdin(process.stdin, function(err, stdin) {
+  if (err) { throw err; }
+
+  // Parse command line options and arguments
+  commander
+    .version(pkg.version)
+    .usage('[options] <file ...>')
+    .option('-j, --json', 'output JSON')
+    .option('    --no-color', 'disable colored output')
+    .parse(process.argv);
+
+  // If called with --json flag, set reporter to json mode
   if (commander.json) {
-    if (commander.args.length === 1) {
-      collectedData = data;
+    reporter.setMode('json');
+  }
+
+  // If no STDIN and no arguments, display usage message
+  if (stdin === null && commander.args.length === 0) {
+    commander.help();
+  }
+
+  // If STDIN and no arguments, add a '-' argument
+  if (stdin !== null && commander.args.length === 0) {
+    commander.args.push('-');
+  }
+
+  // Parse each argument in sequence.
+  async.eachSeries(commander.args, function(arg, callback) {
+    if (arg === '-' && stdin !== null) {
+
+      // Parse STDIN
+      raml.load(stdin).then(function(data) {
+        reporter.success('STDIN', data);
+      }, function(err) {
+        reporter.error('STDIN', err);
+      }).finally(callback);
     } else {
-      collectedData.push(data);
+
+      // Parse file
+      raml.loadFile(arg).then(function(data) {
+        reporter.success(arg, data);
+      }, function(err) {
+        reporter.error(arg, err);
+      }).finally(callback);
     }
-  } else {
-    console.log('[' + file + '] '+'valid'.green);
-  }
-
-  callback();
-};
-
-// Handle failed parsing of RAML file
-var parseFailure = function(file, err, callback) {
-  allValid = false;
-
-  if (err.problem_mark) {
-    console.error('[' + err.problem_mark.name + ':' + err.problem_mark.line + ':' +
-      err.problem_mark.column + '] ' + err.message.red);
-  } else {
-    console.error('[' + file + '] '+err.message.red);
-  }
-
-  callback();
-};
-
-// Define command line options
-commander
-  .version(pkg.version)
-  .usage('[options] <file ...>')
-  .option('-j, --json', 'output JSON')
-  .parse(process.argv);
-
-// If no files specified, display usage message and exit
-if (!commander.args.length) {
-  commander.help();
-}
-
-// Parse each file in sequence.
-async.eachSeries(commander.args, function(file, callback) {
-  raml.loadFile(file).then(function(data) {
-    parseSuccess(file, data, callback);
   }, function(err) {
-    parseFailure(file, err, callback);
-  });
-}, function(err) {
-  // err is not used and should always be undefined.
-  // Any parse errors are handled completely by parseFailure()
+    if (err) { throw err; }
 
-  // If the --json flag is specified and all files are valid, output the parsed data as JSON
-  if (commander.json && allValid) {
-    console.log(JSON.stringify(collectedData, null, '  '));
-  }
+    // Clean up
+    reporter.flush();
+  });
 });

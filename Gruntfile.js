@@ -5,7 +5,7 @@ module.exports = function(grunt) {
 
     // Lint
     jshint: {
-      all: ['Gruntfile.js', 'src/*.js'],
+      all: ['Gruntfile.js', 'src/**/*.js'],
     },
 
     // Bump, Tag, Push
