@@ -1,6 +1,6 @@
 {
   "name": "raml-cop",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Command line RAML validator",
   "keywords": [
     "raml",
@@ -33,7 +33,9 @@
     "grunt": "~0.4.5",
     "grunt-contrib-jshint": "~0.10.0",
     "grunt-bump": "0.0.16",
-    "grunt-shell": "~1.1.1"
+    "grunt-shell": "~1.1.1",
+    "chai": "~1.10.0",
+    "mocha": "~2.0.1"
   },
   "private": false
 }
