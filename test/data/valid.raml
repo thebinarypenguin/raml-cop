@@ -1,0 +1,69 @@
+#%RAML 0.8
+title: Valid Example
+version: v1
+
+resourceTypes:
+  - collection:
+      description: A Collection of <<resourcePathName>>
+
+      get:
+        description: Retrieve all <<resourcePathName>>
+        responses:
+          200:
+          500:
+
+
+      post:
+        description: Create a new <<resourcePathName|!singularize>>
+        responses:
+          201:
+          400:
+          422:
+          500:
+
+  - collectionItem:
+      description: A <<resourcePathName|!singularize>> entity
+
+      get:
+        description: |
+          Retrieve <<resourcePathName|!singularize>> where <<key>> equals **{<<key>>}**
+        responses:
+          200:
+          404:
+          500:
+
+      put:
+        description: |
+          Completely update <<resourcePathName|!singularize>> where <<key>> equals **{<<key>>}**
+        responses:
+          200:
+          400:
+          404:
+          422:
+          500:
+
+      patch:
+        description: |
+          Partially update <<resourcePathName|!singularize>> where <<key>> equals **{<<key>>}**
+        responses:
+          200:
+          400:
+          404:
+          422:
+          500:
+
+      delete:
+        description: |
+          Delete <<resourcePathName|!singularize>> where <<key>> equals **{<<key>>}**
+        responses:
+          200:
+          404:
+          500:
+
+/widget:
+  type: collection
+
+  /{widgetID}:
+    type:
+      collectionItem:
+        key: widgetID

@@ -8,6 +8,14 @@ module.exports = function(grunt) {
       all: ['Gruntfile.js', 'src/**/*.js'],
     },
 
+    // Test
+    mochacli: {
+      options: {
+        reporter: 'spec'
+      },
+      all: ['test/*.js']
+    },
+
     // Bump, Tag, Push
     bump: {
       options: {
@@ -26,10 +34,13 @@ module.exports = function(grunt) {
   });
 
   grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-mocha-cli');
   grunt.loadNpmTasks('grunt-bump');
   grunt.loadNpmTasks('grunt-shell');
 
-  grunt.registerTask('default', ['jshint']);
+  grunt.registerTask('default', ['jshint', 'mochacli']);
+  grunt.registerTask('lint',    ['jshint']);
+  grunt.registerTask('test',    ['mochacli']);
 
   grunt.registerTask("release", "Release a new version, push it and publish it", function(target) {
     if (!target) {

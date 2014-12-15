@@ -35,7 +35,8 @@
     "grunt-bump": "0.0.16",
     "grunt-shell": "~1.1.1",
     "chai": "~1.10.0",
-    "mocha": "~2.0.1"
+    "mocha": "~2.0.1",
+    "grunt-mocha-cli": "~1.11.0"
   },
   "private": false
 }
