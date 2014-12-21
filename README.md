@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/thebinarypenguin/raml-cop.svg?branch=master)](https://travis-ci.org/thebinarypenguin/raml-cop)
+
 # Description
 
 **raml-cop** is a command line tool for validating RAML files. It uses
