@@ -7,3 +7,4 @@ parsing and can optionally output the parsed RAML as JSON.
 # Installation
 
 `npm install -g raml-cop`
+
