@@ -1,4 +1,4 @@
-var colors = require('colors/safe');
+var colors = require('colors');
 
 /*
  * NOTE: the colors module is smart enough to deactivate itself when it
@@ -21,20 +21,33 @@ var reporter = function() {
     },
 
     success: function(name, data) {
+      var src, message = '';
+
       if (mode === 'json') {
         collectedData.push(data);
       } else {
-        console.log('[' + name + '] ' + colors.green('valid'));
+        src     = '[' + name + '] ';
+        message = 'VALID';
+
+        console.log(src + message.green);
       }
     },
 
     error: function(name, err) {
+      var src, message = '';
+
       if (mode === 'json') { errorCount++; }
 
       if (err.problem_mark) {
-        console.log('[' + name + ':' + err.problem_mark.line + ':' + err.problem_mark.column + '] ' + colors.red(err.message));
+        src     = '[' + name + ':' + err.problem_mark.line + ':' + err.problem_mark.column + '] ';
+        message = 'ERROR ' + err.message;
+
+        console.log(src + message.red);
       } else {
-        console.log('[' + name + '] ' + colors.red(err.message));
+        src     = '[' + name + '] ';
+        message = 'ERROR ' + err.message;
+
+        console.log(src + message.red);
       }
     },
 

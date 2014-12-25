@@ -39,7 +39,7 @@ describe('STDIO', function() {
 
     describe('Valid STDIN', function() {
       var validStream = fs.createReadStream(validFile);
-      var pattern     = /^\[STDIN\] valid/;
+      var pattern     = /^\[STDIN\] .*VALID/;
 
       it('Should output "valid"', function(done) {
         testChildProcess(ramlCop, validStream, [], function(err, stdout, stderr) {
@@ -52,7 +52,7 @@ describe('STDIO', function() {
 
     describe('Invalid STDIN', function() {
       var invalidStream = fs.createReadStream(invalidFile);
-      var pattern       = /^\[STDIN:[\d]+:[\d]+\]/;
+      var pattern       = /^\[STDIN:[\d]+:[\d]+\] .*ERROR/;
 
       it('Should output parse error message', function(done) {
         testChildProcess(ramlCop, invalidStream, [], function(err, stdout, stderr) {
@@ -65,7 +65,7 @@ describe('STDIO', function() {
 
     describe('Empty STDIN', function() {
       var emptyStream = fs.createReadStream(emptyFile);
-      var pattern     = /^\[STDIN:[\d]+:[\d]+\]/;
+      var pattern     = /^\[STDIN:[\d]+:[\d]+\] .*ERROR/;
 
       it('Should output parse error message', function(done) {
         testChildProcess(ramlCop, emptyStream, [], function(err, stdout, stderr) {
@@ -80,7 +80,7 @@ describe('STDIO', function() {
   describe('When called with arguments', function() {
 
     describe('Valid File', function() {
-      var pattern = new RegExp('^\\[.*' + path.basename(validFile) + '\\] valid');
+      var pattern = new RegExp('^\\['+validFile+'\\] .*VALID');
 
       it('Should output "valid"', function(done) {
         testChildProcess(ramlCop, null, [validFile], function(err, stdout, stderr) {
@@ -92,31 +92,31 @@ describe('STDIO', function() {
     });
 
     describe('Invalid File', function() {
-      var pattern = new RegExp('^\\[.*' + path.basename(invalidFile) + ':\d+:\d+\\]');
+      var pattern = new RegExp('^\\['+invalidFile+':\\d+:\\d+\\] .*ERROR');
 
       it('Should output parse error message', function(done) {
         testChildProcess(ramlCop, null, [invalidFile], function(err, stdout, stderr) {
           if (err) { done(err); }
-          chai.expect(stdout).to.not.match(pattern);
+          chai.expect(stdout).to.match(pattern);
           done();
         });
       });
     });
 
     describe('Empty File', function() {
-      var pattern = new RegExp('^\\[.*' + path.basename(emptyFile) + ':\d+:\d+\\]');
+      var pattern = new RegExp('^\\['+emptyFile+':\\d+:\\d+\\] .*ERROR');
 
       it('Should output parse error message', function(done) {
         testChildProcess(ramlCop, null, [emptyFile], function(err, stdout, stderr) {
           if (err) { done(err); }
-          chai.expect(stdout).to.not.match(pattern);
+          chai.expect(stdout).to.match(pattern);
           done();
         });
       });
     });
 
     describe('Nonexistent File', function() {
-      var pattern = new RegExp('^\\[.*' + path.basename(nonexistentFile) + '\\] .*Error');
+      var pattern = new RegExp('^\\['+nonexistentFile+'\\] .*ERROR');
 
       it('Should output generic error message', function(done) {
         testChildProcess(ramlCop, null, [nonexistentFile], function(err, stdout, stderr) {
