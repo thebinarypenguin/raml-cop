@@ -20,6 +20,9 @@
       "url": "http://raw.github.com/thebinarypenguin/raml-cop/master/LICENSE"
     }
   ],
+  "scripts": {
+    "test": "grunt"
+  },
   "bin": {
     "raml-cop": "./src/raml-cop.js"
   },
