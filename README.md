@@ -1,12 +1,17 @@
+RAML Cop
+========
+
 [![Build Status](https://travis-ci.org/thebinarypenguin/raml-cop.svg?branch=master)](https://travis-ci.org/thebinarypenguin/raml-cop)
 
-# Description
+A command line tool for validating [RAML](http://raml.org/) files.
 
-**raml-cop** is a command line tool for validating RAML files. It uses
-[raml-org/raml-js-parser](https://github.com/raml-org/raml-js-parser) for
-parsing and can optionally output the parsed RAML as JSON.
+## Details
 
-# Installation
+* Uses [raml-org/raml-js-parser](https://github.com/raml-org/raml-js-parser) to do the parsing
+* Accepts input via stdin and/or command line arguments
+* Can output the parsed RAML as JSON using the `-j` or `--json` option
+
+## Installation
 
 `npm install -g raml-cop`
 
