@@ -12,9 +12,9 @@ var emptyFile       = path.join(__dirname, 'data', 'empty.raml');
 var nonexistentFile = path.join(__dirname, 'data', 'nonexistent.raml');
 
 var testChildProcess = function(command, stdin, args, callback) {
-  var proc   = null;
-  var stdout = '';
-  var stderr = '';
+  var proc      = null;
+  var stdout    = '';
+  var stderr    = '';
 
   if (stdin) {
     // Pipe specified stdin stream to child process
@@ -30,7 +30,7 @@ var testChildProcess = function(command, stdin, args, callback) {
   proc.stderr.on('data', function (data) { stderr += data; });
 
   // Ding! Fries are done.
-  proc.on('close', function (code) { callback(null, stdout, stderr); });
+  proc.on('close', function (code) { callback(null, stdout, stderr, code); });
 };
 
 describe('STDIO', function() {
@@ -38,26 +38,42 @@ describe('STDIO', function() {
   describe('When called with STDIN', function() {
 
     describe('Valid STDIN', function() {
-      var validStream = fs.createReadStream(validFile);
+      var validStream = function() { return fs.createReadStream(validFile) };
       var pattern     = /^\[STDIN\] .*VALID/;
 
       it('Should output "valid"', function(done) {
-        testChildProcess(ramlCop, validStream, [], function(err, stdout, stderr) {
+        testChildProcess(ramlCop, validStream(), [], function(err, stdout, stderr) {
           if (err) { done(err); }
           chai.expect(stdout).to.match(pattern);
+          done();
+        });
+      });
+
+      it('Should have an exit code of 0', function(done) {
+        testChildProcess(ramlCop, validStream(), [], function(err, stdout, stderr, code) {
+          if (err) { done(err); }
+          chai.expect(code).to.eq(0);
           done();
         });
       });
     });
 
     describe('Invalid STDIN', function() {
-      var invalidStream = fs.createReadStream(invalidFile);
+      var invalidStream = function() { return fs.createReadStream(invalidFile); }
       var pattern       = /^\[STDIN:[\d]+:[\d]+\] .*ERROR/;
 
       it('Should output parse error message', function(done) {
-        testChildProcess(ramlCop, invalidStream, [], function(err, stdout, stderr) {
+        testChildProcess(ramlCop, invalidStream(), [], function(err, stdout, stderr, code) {
           if (err) { done(err); }
           chai.expect(stdout).to.match(pattern);
+          done();
+        });
+      });
+
+      it('Should have an exit code of 1', function(done) {
+        testChildProcess(ramlCop, invalidStream(), [], function(err, stdout, stderr, code) {
+          if (err) { done(err); }
+          chai.expect(code).to.eq(1);
           done();
         });
       });
@@ -89,6 +105,14 @@ describe('STDIO', function() {
           done();
         });
       });
+
+      it('Should have an exit code of 0', function(done) {
+        testChildProcess(ramlCop, null, [validFile], function(err, stdout, stderr, code) {
+          if (err) { done(err); }
+          chai.expect(code).to.eq(0);
+          done();
+        });
+      });
     });
 
     describe('Invalid File', function() {
@@ -98,6 +122,14 @@ describe('STDIO', function() {
         testChildProcess(ramlCop, null, [invalidFile], function(err, stdout, stderr) {
           if (err) { done(err); }
           chai.expect(stdout).to.match(pattern);
+          done();
+        });
+      });
+
+      it('Should have an exit code of 1', function(done) {
+        testChildProcess(ramlCop, null, [invalidFile], function(err, stdout, stderr, code) {
+          if (err) { done(err); }
+          chai.expect(code).to.eq(1);
           done();
         });
       });

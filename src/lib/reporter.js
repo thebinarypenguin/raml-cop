@@ -12,6 +12,9 @@ var reporter = function() {
   var collectedData = [];
 
   return {
+    getErrorCount: function() {
+      return errorCount;
+    },
     setMode: function(val) {
       switch (val.toLowerCase()) {
         case 'normal': mode = 'normal'; break;
@@ -36,7 +39,7 @@ var reporter = function() {
     error: function(name, err) {
       var src, message = '';
 
-      if (mode === 'json') { errorCount++; }
+      errorCount++;
 
       if (err.problem_mark) {
         src     = '[' + name + ':' + err.problem_mark.line + ':' + err.problem_mark.column + '] ';
