@@ -61,5 +61,9 @@ utils.readStdin(process.stdin, function(err, stdin) {
 
     // Clean up
     reporter.flush();
+
+    if (reporter.getErrorCount() > 0) {
+      process.exit(1);
+    }
   });
 });
