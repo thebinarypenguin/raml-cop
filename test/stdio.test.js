@@ -30,7 +30,7 @@ var testChildProcess = function(command, stdin, args, callback) {
   proc.stderr.on('data', function (data) { stderr += data; });
 
   // Ding! Fries are done.
-  proc.on('close', function (code) { callback(null, stdout, stderr); });
+  proc.on('close', function (code) { callback(null, stdout, stderr, code); });
 };
 
 describe('STDIO', function() {
@@ -38,41 +38,74 @@ describe('STDIO', function() {
   describe('When called with STDIN', function() {
 
     describe('Valid STDIN', function() {
-      var validStream = fs.createReadStream(validFile);
-      var pattern     = /^\[STDIN\] .*VALID/;
+      var results = {};
 
-      it('Should output "valid"', function(done) {
-        testChildProcess(ramlCop, validStream, [], function(err, stdout, stderr) {
+      before(function(done) {
+        var validStream = fs.createReadStream(validFile);
+
+        testChildProcess(ramlCop, validStream, [], function(err, stdout, stderr, code) {
           if (err) { done(err); }
-          chai.expect(stdout).to.match(pattern);
+          results.stdout = stdout;
+          results.stderr = stderr;
+          results.code = code;
           done();
         });
+      });
+
+      it('Should output "valid"', function() {
+        chai.expect(results.stdout).to.match(/^\[STDIN\] .*VALID/);
+      });
+
+      it('Should exit with code 0', function() {
+        chai.expect(results.code).to.eql(0);
       });
     });
 
     describe('Invalid STDIN', function() {
-      var invalidStream = fs.createReadStream(invalidFile);
-      var pattern       = /^\[STDIN:[\d]+:[\d]+\] .*ERROR/;
+      var results = {};
 
-      it('Should output parse error message', function(done) {
-        testChildProcess(ramlCop, invalidStream, [], function(err, stdout, stderr) {
+      before(function(done) {
+        var invalidStream = fs.createReadStream(invalidFile);
+
+        testChildProcess(ramlCop, invalidStream, [], function(err, stdout, stderr, code) {
           if (err) { done(err); }
-          chai.expect(stdout).to.match(pattern);
+          results.stdout = stdout;
+          results.stderr = stderr;
+          results.code = code;
           done();
         });
+      });
+
+      it('Should output parse error message', function() {
+        chai.expect(results.stdout).to.match(/^\[STDIN:[\d]+:[\d]+\] .*ERROR/);
+      });
+
+      it('Should exit with code 1', function() {
+        chai.expect(results.code).to.eql(1);
       });
     });
 
     describe('Empty STDIN', function() {
-      var emptyStream = fs.createReadStream(emptyFile);
-      var pattern     = /^\[STDIN:[\d]+:[\d]+\] .*ERROR/;
+      var results = {};
 
-      it('Should output parse error message', function(done) {
-        testChildProcess(ramlCop, emptyStream, [], function(err, stdout, stderr) {
+      before(function(done) {
+        var emptyStream = fs.createReadStream(emptyFile);
+
+        testChildProcess(ramlCop, emptyStream, [], function(err, stdout, stderr, code) {
           if (err) { done(err); }
-          chai.expect(stdout).to.match(pattern);
+          results.stdout = stdout;
+          results.stderr = stderr;
+          results.code = code;
           done();
         });
+      });
+
+      it('Should output parse error message', function() {
+        chai.expect(results.stdout).to.match(/^\[STDIN:[\d]+:[\d]+\] .*ERROR/);
+      });
+
+      it('Should exit with code 1', function() {
+        chai.expect(results.code).to.eql(1);
       });
     });
   });
@@ -80,50 +113,90 @@ describe('STDIO', function() {
   describe('When called with arguments', function() {
 
     describe('Valid File', function() {
-      var pattern = new RegExp('^\\['+validFile+'\\] .*VALID');
+      var results = {};
 
-      it('Should output "valid"', function(done) {
-        testChildProcess(ramlCop, null, [validFile], function(err, stdout, stderr) {
+      before(function(done) {
+        testChildProcess(ramlCop, null, [validFile], function(err, stdout, stderr, code) {
           if (err) { done(err); }
-          chai.expect(stdout).to.match(pattern);
+          results.stdout = stdout;
+          results.stderr = stderr;
+          results.code = code;
           done();
         });
+      });
+
+      it('Should output "valid"', function() {
+        chai.expect(results.stdout).to.match(new RegExp('^\\['+validFile+'\\] .*VALID'));
+      });
+
+      it('Should exit with code 0', function() {
+        chai.expect(results.code).to.eql(0);
       });
     });
 
     describe('Invalid File', function() {
-      var pattern = new RegExp('^\\['+invalidFile+':\\d+:\\d+\\] .*ERROR');
+      var results = {};
 
-      it('Should output parse error message', function(done) {
-        testChildProcess(ramlCop, null, [invalidFile], function(err, stdout, stderr) {
+      before(function(done) {
+        testChildProcess(ramlCop, null, [invalidFile], function(err, stdout, stderr, code) {
           if (err) { done(err); }
-          chai.expect(stdout).to.match(pattern);
+          results.stdout = stdout;
+          results.stderr = stderr;
+          results.code = code;
           done();
         });
+      });
+
+      it('Should output parse error message', function() {
+        chai.expect(results.stdout).to.match(new RegExp('^\\['+invalidFile+':\\d+:\\d+\\] .*ERROR'));
+      });
+
+      it('Should exit with code 1', function() {
+        chai.expect(results.code).to.eql(1);
       });
     });
 
     describe('Empty File', function() {
-      var pattern = new RegExp('^\\['+emptyFile+':\\d+:\\d+\\] .*ERROR');
+      var results = {};
 
-      it('Should output parse error message', function(done) {
-        testChildProcess(ramlCop, null, [emptyFile], function(err, stdout, stderr) {
+      before(function(done) {
+        testChildProcess(ramlCop, null, [emptyFile], function(err, stdout, stderr, code) {
           if (err) { done(err); }
-          chai.expect(stdout).to.match(pattern);
+          results.stdout = stdout;
+          results.stderr = stderr;
+          results.code = code;
           done();
         });
+      });
+
+      it('Should output parse error message', function() {
+        chai.expect(results.stdout).to.match(new RegExp('^\\['+emptyFile+':\\d+:\\d+\\] .*ERROR'));
+      });
+
+      it('Should exit with code 1', function() {
+        chai.expect(results.code).to.eql(1);
       });
     });
 
     describe('Nonexistent File', function() {
-      var pattern = new RegExp('^\\['+nonexistentFile+'\\] .*ERROR');
+      var results = {};
 
-      it('Should output generic error message', function(done) {
-        testChildProcess(ramlCop, null, [nonexistentFile], function(err, stdout, stderr) {
+      before(function(done) {
+        testChildProcess(ramlCop, null, [nonexistentFile], function(err, stdout, stderr, code) {
           if (err) { done(err); }
-          chai.expect(stdout).to.match(pattern);
+          results.stdout = stdout;
+          results.stderr = stderr;
+          results.code = code;
           done();
         });
+      });
+
+      it('Should output generic error message', function() {
+          chai.expect(results.stdout).to.match(new RegExp('^\\['+nonexistentFile+'\\] .*ERROR'));
+      });
+
+      it('Should exit with code 1', function() {
+        chai.expect(results.code).to.eql(1);
       });
     });
 
@@ -184,14 +257,24 @@ describe('STDIO', function() {
   });
 
   describe('When called with neither STDIN nor arguments', function() {
-    var pattern = /Usage: /;
+    var results = {};
 
-    it('Should output usage message', function(done) {
-      testChildProcess(ramlCop, null, [], function(err, stdout, stderr) {
+    before(function(done) {
+      testChildProcess(ramlCop, null, [], function(err, stdout, stderr, code) {
         if (err) { done(err); }
-        chai.expect(stdout).to.match(pattern);
+        results.stdout = stdout;
+        results.stderr = stderr;
+        results.code = code;
         done();
       });
+    });
+
+    it('Should output usage message', function() {
+      chai.expect(results.stdout).to.match(/Usage: /);
+    });
+
+    it('Should exit with code 0', function() {
+      chai.expect(results.code).to.eql(0);
     });
   });
 

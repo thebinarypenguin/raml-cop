@@ -14,6 +14,8 @@ var pkg       = require('../package.json');
 utils.readStdin(process.stdin, function(err, stdin) {
   if (err) { throw err; }
 
+  var errorCount = 0;
+
   // Parse command line options and arguments
   commander
     .version(pkg.version)
@@ -46,6 +48,7 @@ utils.readStdin(process.stdin, function(err, stdin) {
         reporter.success('STDIN', data);
       }, function(err) {
         reporter.error('STDIN', err);
+        errorCount++;
       }).finally(callback);
     } else {
 
@@ -54,6 +57,7 @@ utils.readStdin(process.stdin, function(err, stdin) {
         reporter.success(arg, data);
       }, function(err) {
         reporter.error(arg, err);
+        errorCount++;
       }).finally(callback);
     }
   }, function(err) {
@@ -61,5 +65,9 @@ utils.readStdin(process.stdin, function(err, stdin) {
 
     // Clean up
     reporter.flush();
+
+    if (errorCount > 0) {
+      process.exit(1);
+    }
   });
 });
