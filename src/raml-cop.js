@@ -2,72 +2,114 @@
 
 "use strict";
 
-var async     = require('async');
-var commander = require('commander');
-var raml      = require('raml-parser');
-var utils     = require('./lib/utils.js');
-var reporter  = require('./lib/reporter.js');
-var pkg       = require('../package.json');
+const async     = require('async');
+const Bluebird  = require('bluebird');
+const colors    = require('colors');
+const commander = require('commander');
+const fs        = require('fs');
+const raml      = require('raml-1-parser');
+const pkg       = require('../package.json');
 
+const readInput = function (name) {
 
-// Read STDIN into a string
-utils.readStdin(process.stdin, function(err, stdin) {
-  if (err) { throw err; }
+  return new Bluebird((resolve, reject) => {
 
-  var errorCount = 0;
+    let allTheChunks = '';
+    let inputStream  = (name === '-') ? process.stdin : fs.createReadStream(name);
 
-  // Parse command line options and arguments
-  commander
-    .version(pkg.version)
-    .usage('[options] <file ...>')
-    .option('-j, --json', 'output JSON')
-    .option('    --no-color', 'disable colored output')
-    .parse(process.argv);
+    inputStream.setEncoding('utf8');
 
-  // If called with --json flag, set reporter to json mode
-  if (commander.json) {
-    reporter.setMode('json');
-  }
+    inputStream.on('error', (err) => {
+      return reject(err);
+    });
 
-  // If no STDIN and no arguments, display usage message
-  if (stdin === null && commander.args.length === 0) {
-    commander.help();
-  }
+    inputStream.on('end', () => {
+      return resolve(allTheChunks);
+    });
 
-  // If STDIN and no arguments, add a '-' argument
-  if (stdin !== null && commander.args.length === 0) {
-    commander.args.push('-');
-  }
+    inputStream.on('data', (chunk) => {
+      allTheChunks += chunk;
+    });
 
-  // Parse each argument in sequence.
-  async.eachSeries(commander.args, function(arg, callback) {
-    if (arg === '-' && stdin !== null) {
-
-      // Parse STDIN
-      raml.load(stdin).then(function(data) {
-        reporter.success('STDIN', data);
-      }, function(err) {
-        reporter.error('STDIN', err);
-        errorCount++;
-      }).finally(callback);
-    } else {
-
-      // Parse file
-      raml.loadFile(arg).then(function(data) {
-        reporter.success(arg, data);
-      }, function(err) {
-        reporter.error(arg, err);
-        errorCount++;
-      }).finally(callback);
-    }
-  }, function(err) {
-    if (err) { throw err; }
-
-    // Clean up
-    reporter.flush();
-
-    if (errorCount > 0) {
-      process.exit(1);
-    }
   });
+};
+
+const outputSuccess = function (name) {
+  let src = (name === '-') ? 'STDIN' : name;
+  let msg = colors.green('VALID');
+
+  console.log(`[${src}] ${msg}`);
+};
+
+const outputFailure = function (name, err) {
+  
+  if (err.parserErrors) {
+
+    err.parserErrors.forEach((e) => {
+      let src = (name === '-') ? 'STDIN' : name;
+      let line = e.range.start.line;
+      let column = e.range.start.column;
+      let msg = colors.red(e.message);
+
+      console.log(`[${src}:${line}:${column}] ${msg}`);
+    });
+
+  } else {
+
+    let src = (name === '-') ? 'STDIN' : name;
+    let msg = colors.red(err.message);
+
+    console.log(`[${src}] ${msg}`);
+  }
+};
+
+// Parse command line arguments
+commander
+  .version(pkg.version)
+  .usage('[options] <file ...>')
+  .option('    --no-color', 'disable colored output')
+  .parse(process.argv);
+
+// If STDIN is present (i.e. not a TTY) and commander.args doesn't contain '-', 
+// then prepend '-' to commander.args
+if (!process.stdin.isTTY && commander.args.indexOf('-') === -1) {
+  commander.args.unshift('-');
+}
+
+// If there are no inputs to process, then display the usage message
+if (commander.args.length === 0) {
+  commander.help();
+}
+
+// keep track of error count for return code
+let errors = 0;
+
+// Process each input sequentially
+async.eachSeries(commander.args, (input, callback) => {
+  
+  // Iterator function
+
+  readInput(input)
+    .then((str) => {
+      return raml.parseRAML(str, { rejectOnErrors: true });
+    })
+    .then(() => {
+      outputSuccess(input);
+    })
+    .catch((err) => {
+      errors++;
+      outputFailure(input, err);
+    })
+    .finally(() => {
+      callback();
+    });
+
+}, () => {
+
+  // End function
+
+  if (errors > 0) {
+    process.exit(1);
+  }
+
 });
