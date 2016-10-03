@@ -1,0 +1,23 @@
+#%RAML 1.0
+title: Hello world
+
+/helloworld:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: |
+              {
+                "title": "Hello world Response",
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  }
+                }
+              }
+            example: |
+              {
+                "message": "Hello world"
+              }
