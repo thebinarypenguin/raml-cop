@@ -10,6 +10,7 @@ const path         = require('path');
 // File paths
 const ramlCop     = path.join(__dirname, '..', '..', 'src', 'raml-cop.js');
 const valid       = path.join(__dirname, 'data', 'valid.raml');
+const include     = path.join(__dirname, 'data', 'include.raml');
 const oneError    = path.join(__dirname, 'data', 'one-error.raml');
 const twoErrors   = path.join(__dirname, 'data', 'two-errors.raml');
 const empty       = path.join(__dirname, 'data', 'empty.raml');
@@ -59,6 +60,37 @@ describe('1.0 Tests', function() {
 
       it ('STDOUT should contain filename', function() {
         chai.expect(results.stdout).to.contain(valid);
+      });
+
+      it ('STDOUT should match regex', function() {
+        chai.expect(results.stdout).to.match(/^\[.+\] VALID/);
+      });    
+
+      it ('STDERR should be empty', function() {
+        chai.expect(results.stderr).to.be.empty;
+      });
+
+      it('Should exit with code 0', function() {
+        chai.expect(results.code).to.eql(0);
+      });
+    });
+
+    describe('Valid input with a !include tag', function () {
+
+      let results = {};
+      
+      before(function (done) {
+
+        testChildProcess(ramlCop, [include], null, function (err, data) {
+          if (err) { done(err); }
+
+          results = data;
+          done();
+        });
+      });
+
+      it ('STDOUT should contain filename', function() {
+        chai.expect(results.stdout).to.contain(include);
       });
 
       it ('STDOUT should match regex', function() {
@@ -238,27 +270,6 @@ describe('1.0 Tests', function() {
 
       it('Each argument is processed in the order in which it appears', function () {
         chai.expect(stdoutLines[0]).to.contain(valid);
-        chai.expect(stdoutLines[1]).to.contain(oneError);
-        chai.expect(stdoutLines[2]).to.contain(empty);
-      });
-    });
-
-    describe('STDIN and multiple arguments', function () {
-
-      let stdoutLines = null;
-      
-      before(function (done) {
-
-        testChildProcess(ramlCop, [oneError, empty], fs.createReadStream(valid), function (err, data) {
-          if (err) { done(err); }
-
-          stdoutLines = data.stdout.split(/\r?\n/);
-          done();
-        });
-      });
-
-      it('STDIN is processed first then each argument is processed in the order in which it appears', function () {
-        chai.expect(stdoutLines[0]).to.contain('STDIN');
         chai.expect(stdoutLines[1]).to.contain(oneError);
         chai.expect(stdoutLines[2]).to.contain(empty);
       });

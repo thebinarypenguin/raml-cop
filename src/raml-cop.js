@@ -6,33 +6,8 @@ const async     = require('async');
 const Bluebird  = require('bluebird');
 const colors    = require('colors');
 const commander = require('commander');
-const fs        = require('fs');
 const raml      = require('raml-1-parser');
 const pkg       = require('../package.json');
-
-const readInput = function (name) {
-
-  return new Bluebird((resolve, reject) => {
-
-    let allTheChunks = '';
-    let inputStream  = (name === '-') ? process.stdin : fs.createReadStream(name);
-
-    inputStream.setEncoding('utf8');
-
-    inputStream.on('error', (err) => {
-      return reject(err);
-    });
-
-    inputStream.on('end', () => {
-      return resolve(allTheChunks);
-    });
-
-    inputStream.on('data', (chunk) => {
-      allTheChunks += chunk;
-    });
-
-  });
-};
 
 const outputSuccess = function (name) {
   let src = (name === '-') ? 'STDIN' : name;
@@ -70,12 +45,6 @@ commander
   .option('    --no-color', 'disable colored output')
   .parse(process.argv);
 
-// If STDIN is present (i.e. not a TTY) and commander.args doesn't contain '-', 
-// then prepend '-' to commander.args
-if (!process.stdin.isTTY && commander.args.indexOf('-') === -1) {
-  commander.args.unshift('-');
-}
-
 // If there are no inputs to process, then display the usage message
 if (commander.args.length === 0) {
   commander.help();
@@ -89,10 +58,8 @@ async.eachSeries(commander.args, (input, callback) => {
   
   // Iterator function
 
-  readInput(input)
-    .then((str) => {
-      return raml.parseRAML(str, { rejectOnErrors: true });
-    })
+  Bluebird
+    .resolve(raml.loadRAML(input, [], { rejectOnErrors: true }))
     .then(() => {
       outputSuccess(input);
     })
