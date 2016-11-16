@@ -2,7 +2,6 @@
 
 "use strict";
 
-const async     = require('async');
 const Bluebird  = require('bluebird');
 const colors    = require('colors');
 const commander = require('commander');
@@ -54,29 +53,22 @@ if (commander.args.length === 0) {
 let errors = 0;
 
 // Process each input sequentially
-async.eachSeries(commander.args, (input, callback) => {
-  
-  // Iterator function
+Bluebird
+  .resolve(commander.args)
+  .each((input) => {
 
-  Bluebird
-    .resolve(raml.loadRAML(input, [], { rejectOnErrors: true }))
-    .then(() => {
-      outputSuccess(input);
-    })
-    .catch((err) => {
-      errors++;
-      outputFailure(input, err);
-    })
-    .finally(() => {
-      callback();
-    });
-
-}, () => {
-
-  // End function
-
-  if (errors > 0) {
-    process.exit(1);
-  }
-
-});
+    return Bluebird
+      .resolve(raml.loadRAML(input, [], { rejectOnErrors: true }))
+      .then(() => {
+        outputSuccess(input);
+      })
+      .catch((err) => {
+        errors++;
+        outputFailure(input, err);
+      });
+  })
+  .finally(() => {
+    if (errors > 0) {
+      process.exit(1);
+    }
+  });
