@@ -20,7 +20,7 @@ const outputFailure = function (name, err) {
   if (err.parserErrors) {
 
     err.parserErrors.forEach((e) => {
-      let src = (name === '-') ? 'STDIN' : name;
+      let src = e.path;
       let line = e.range.start.line;
       let column = e.range.start.column;
       let msg = colors.red(e.message);
