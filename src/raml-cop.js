@@ -6,6 +6,7 @@ const Bluebird  = require('bluebird');
 const colors    = require('colors');
 const commander = require('commander');
 const raml      = require('raml-1-parser');
+const path      = require('path');
 const pkg       = require('../package.json');
 
 const outputSuccess = function (name) {
@@ -20,7 +21,7 @@ const outputFailure = function (name, err) {
   if (err.parserErrors) {
 
     err.parserErrors.forEach((e) => {
-      let src = e.path;
+      let src = path.join(path.dirname(name), e.path);
       let line = e.range.start.line;
       let column = e.range.start.column;
       let msg = colors.red(e.message);
