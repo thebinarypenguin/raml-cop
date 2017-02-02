@@ -1,0 +1,19 @@
+#%RAML 0.8
+title: Valid Include
+version: v1
+protocols: HTTPS
+mediaType: application/json
+
+schemas: !include includes/valid-include.yaml
+
+/hello:
+
+  get:
+    description: An example endpoint
+    responses:
+      200:
+
+/world:
+
+  get:
+    description: Another example endpoint
