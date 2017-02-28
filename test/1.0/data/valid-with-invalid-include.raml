@@ -1,0 +1,23 @@
+#%RAML 1.0
+title: Invalid Include
+description: This document includes an invalid file
+version: v1
+protocols: HTTPS
+mediaType: application/json
+
+types:
+  message: !include includes/invalid-include.raml
+
+/hello:
+
+  get:
+    description: An example endpoint
+    responses:
+      200:
+        body:
+          type: message
+
+/world:
+
+  get:
+    description: Another example endpoint

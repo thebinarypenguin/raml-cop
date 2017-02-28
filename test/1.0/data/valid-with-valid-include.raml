@@ -1,0 +1,23 @@
+#%RAML 1.0
+title: Valid Include
+description: This document includes a valid file
+version: v1
+protocols: HTTPS
+mediaType: application/json
+
+types:
+  message: !include includes/valid-include.raml
+
+/hello:
+
+  get:
+    description: An example endpoint
+    responses:
+      200:
+        body:
+          type: message
+
+/world:
+
+  get:
+    description: Another example endpoint

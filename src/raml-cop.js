@@ -5,70 +5,121 @@
 const Bluebird  = require('bluebird');
 const colors    = require('colors');
 const commander = require('commander');
+const path      = require('path');
 const raml      = require('raml-1-parser');
 const pkg       = require('../package.json');
 
-const outputSuccess = function (name) {
-  let src = (name === '-') ? 'STDIN' : name;
-  let msg = colors.green('VALID');
+/**
+ * Validate a file. 
+ * Returns a Bluebird promise that resolves with an object 
+ * (with 'src' and 'message' properties) or rejects with an error.
+ */
+const validate = function (filename, options) {
 
-  console.log(`[${src}] ${msg}`);
-};
+  const defaultOptions = {
+    reportIncludeErrors: true,
+  };
 
-const outputFailure = function (name, err) {
-  
-  if (err.parserErrors) {
+  const mergedOptions = Object.assign({}, defaultOptions, options || {});
 
-    err.parserErrors.forEach((e) => {
-      let src = (name === '-') ? 'STDIN' : name;
-      let line = e.range.start.line;
-      let column = e.range.start.column;
-      let msg = colors.red(e.message);
+  return Bluebird
+    .resolve()
+    .then(() => {
 
-      console.log(`[${src}:${line}:${column}] ${msg}`);
+      return raml.loadRAML(filename, [], { rejectOnErrors: true });
+    })
+    .then(() => {
+
+      return { src: filename, message: 'VALID' };
+    })
+    .catch((err) => {
+
+      const errorsToReport = [];
+
+      // Generic error
+      if (!err.parserErrors) {
+        err.results = [{ src: filename, message: err.message }];
+        throw err;
+      }
+
+      // RAML parser error
+      err.parserErrors.forEach((e) => {
+
+        let errFilename = path.join(path.dirname(filename), e.path);
+
+        if (!mergedOptions.reportIncludeErrors && errFilename !== filename) {
+          return;
+        }
+
+        errorsToReport.push({
+          src: `${errFilename}:${e.range.start.line}:${e.range.start.column}`,
+          message: e.message,
+        });
+      });
+
+      // If we have errors to report, throw an error otherwise report success
+      if (errorsToReport.length > 0) {
+        
+        let ve = new Error('Validation Error');
+        ve.results = errorsToReport;
+        throw ve;
+      } else {
+
+        return { src: filename, message: 'VALID' };
+      }
     });
-
-  } else {
-
-    let src = (name === '-') ? 'STDIN' : name;
-    let msg = colors.red(err.message);
-
-    console.log(`[${src}] ${msg}`);
-  }
 };
+
+let errorCount = 0;
+
+const validationOptions = {}; 
 
 // Parse command line arguments
 commander
   .version(pkg.version)
   .usage('[options] <file ...>')
   .option('    --no-color', 'disable colored output')
+  .option('    --no-includes', 'do not report errors for include files')
   .parse(process.argv);
 
-// If there are no inputs to process, then display the usage message
+// --no-colors option
+  // (handled automagically by colors module)
+
+// --no-includes options
+if (!commander.includes) {
+  validationOptions.reportIncludeErrors = false;
+}
+
+// If there are no files to process, then display the usage message
 if (commander.args.length === 0) {
   commander.help();
 }
 
-// keep track of error count for return code
-let errors = 0;
-
-// Process each input sequentially
+// Process each file sequentially
 Bluebird
-  .resolve(commander.args)
-  .each((input) => {
+  .each(commander.args, (file) => {
+    
+    // Validate the file
+    return validate(file, validationOptions)
+      .then((result) => {
 
-    return Bluebird
-      .resolve(raml.loadRAML(input, [], { rejectOnErrors: true }))
-      .then(() => {
-        outputSuccess(input);
+        // File is valid
+        console.log(`[${result.src}] ${colors.green(result.message)}`);
       })
       .catch((err) => {
-        errors++;
-        outputFailure(input, err);
+
+        // Something went wrong. Display error message for each error
+        err.results.forEach((e) => {
+          console.log(`[${e.src}] ${colors.red(e.message)}`);
+          errorCount++;
+        });
       });
   })
   .finally(() => {
-    if (errors > 0) {
+    
+    // If any errors occurred, return a proper error code
+    if (errorCount > 0) {
       process.exit(1);
     }
   });
+  
