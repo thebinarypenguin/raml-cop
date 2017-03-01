@@ -38,7 +38,7 @@ const validate = function (filename, options) {
 
       // Generic error
       if (!err.parserErrors) {
-        err.results = [{ src: filename, message: err.message }];
+        err.results = [{ src: filename, message: err.message, isWarning: err.isWarning }];
         throw err;
       }
 
@@ -54,6 +54,7 @@ const validate = function (filename, options) {
         errorsToReport.push({
           src: `${errFilename}:${e.range.start.line}:${e.range.start.column}`,
           message: e.message,
+          isWarning: e.isWarning
         });
       });
 
@@ -110,7 +111,12 @@ Bluebird
 
         // Something went wrong. Display error message for each error
         err.results.forEach((e) => {
-          console.log(`[${e.src}] ${colors.red(e.message)}`);
+
+          if (e.isWarning) {
+            console.log(`[${e.src}] ${colors.yellow(e.message)}`);
+          } else {
+            console.log(`[${e.src}] ${colors.red(e.message)}`);
+          }
           errorCount++;
         });
       });
