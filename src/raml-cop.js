@@ -18,6 +18,7 @@ const validate = function (filename, options) {
 
   const defaultOptions = {
     reportIncludeErrors: true,
+    reportIncludeWarnings: true,
   };
 
   const mergedOptions = Object.assign({}, defaultOptions, options || {});
@@ -47,7 +48,8 @@ const validate = function (filename, options) {
 
         let errFilename = path.join(path.dirname(filename), e.path);
 
-        if (!mergedOptions.reportIncludeErrors && errFilename !== filename) {
+        if ((!mergedOptions.reportIncludeErrors && errFilename !== filename) || 
+          (!mergedOptions.reportIncludeWarnings && e.isWarning)) {
           return;
         }
 
@@ -81,6 +83,7 @@ commander
   .usage('[options] <file ...>')
   .option('    --no-color', 'disable colored output')
   .option('    --no-includes', 'do not report errors for include files')
+  .option('    --no-warnings', 'do not report warnings')
   .parse(process.argv);
 
 // --no-colors option
@@ -89,6 +92,11 @@ commander
 // --no-includes options
 if (!commander.includes) {
   validationOptions.reportIncludeErrors = false;
+}
+
+// --no-warnings options
+if (!commander.warnings) {
+  validationOptions.reportIncludeWarnings = false;
 }
 
 // If there are no files to process, then display the usage message
