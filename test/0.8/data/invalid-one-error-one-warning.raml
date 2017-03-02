@@ -1,0 +1,34 @@
+#%RAML 0.8
+title: One Error
+version: v1
+protocols: HTTPS
+mediaType: application/json
+
+/hello:
+
+  get:
+    description: An example endpoint
+    responses:
+        200:
+          body:
+            application/json:
+              schema: |
+                {
+                  "properties" : {
+                    "hello": 
+                      {
+                        "type" : "string",
+                        "required" : true
+                      }
+                    }
+                }
+              example: |
+                {
+                  "hello": false
+                }
+
+/world:
+
+  get:
+    description: 
+    Another example endpoint
