@@ -18,7 +18,7 @@ const validate = function (filename, options) {
 
   const defaultOptions = {
     reportIncludeErrors: true,
-    reportIncludeWarnings: true,
+    reportWarnings: true,
   };
 
   const mergedOptions = Object.assign({}, defaultOptions, options || {});
@@ -49,7 +49,7 @@ const validate = function (filename, options) {
         let errFilename = path.join(path.dirname(filename), e.path);
 
         if ((!mergedOptions.reportIncludeErrors && errFilename !== filename) || 
-          (!mergedOptions.reportIncludeWarnings && e.isWarning)) {
+          (!mergedOptions.reportWarnings && e.isWarning)) {
           return;
         }
 
@@ -96,7 +96,7 @@ if (!commander.includes) {
 
 // --no-warnings options
 if (!commander.warnings) {
-  validationOptions.reportIncludeWarnings = false;
+  validationOptions.reportWarnings = false;
 }
 
 // If there are no files to process, then display the usage message
