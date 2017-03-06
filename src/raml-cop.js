@@ -48,8 +48,11 @@ const validate = function (filename, options) {
 
         let errFilename = path.join(path.dirname(filename), e.path);
 
-        if ((!mergedOptions.reportIncludeErrors && errFilename !== filename) || 
-          (!mergedOptions.reportWarnings && e.isWarning)) {
+        if (!mergedOptions.reportIncludeErrors && errFilename !== filename) {
+          return;
+        }
+
+        if (!mergedOptions.reportWarnings && e.isWarning) {
           return;
         }
 
