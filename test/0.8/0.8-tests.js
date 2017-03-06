@@ -339,6 +339,68 @@ describe('RAML 0.8 Tests', function () {
     });
   });
 
+  describe('Invalid file with one warning (default)', function () {
+
+    const ramlCop = path.join(__dirname, '..', '..', 'src', 'raml-cop.js');
+    const file    = path.join(__dirname, 'data', 'invalid-one-warning.raml');
+    
+    let results = {};
+      
+    before(function (done) {
+
+      testChildProcess(ramlCop, [file], (err, data) => {
+        if (err) { return done(err); }
+
+        results = data;
+        done();
+      });
+    });
+
+    it ('STDOUT should contain filename, line number, column number, and message for both error and warning', function() {
+      chai.expect(results.stdout).to.contain(file);
+      chai.expect(results.stdout).to.match(/^\[.+:[0-9]+:[0-9]+\] .+/);
+    });
+
+    it ('STDERR should be empty', function() {
+      chai.expect(results.stderr).to.be.empty;
+    });
+
+    it('Should exit with code 1', function() {
+      chai.expect(results.code).to.eql(1);
+    });
+  });
+
+  describe('Invalid file with one warning (--no-warnings)', function () {
+
+    const ramlCop = path.join(__dirname, '..', '..', 'src', 'raml-cop.js');
+    const file    = path.join(__dirname, 'data', 'invalid-one-warning.raml');
+    
+    let results = {};
+      
+    before(function (done) {
+
+      testChildProcess(ramlCop, ['--no-warnings', file], (err, data) => {
+        if (err) { return done(err); }
+
+        results = data;
+        done();
+      });
+    });
+
+    it ('STDOUT should contain filename and "VALID"', function() {
+      chai.expect(results.stdout).to.contain(file);
+      chai.expect(results.stdout).to.match(/^\[.+\] VALID/);
+    });
+
+    it ('STDERR should be empty', function() {
+      chai.expect(results.stderr).to.be.empty;
+    });
+
+    it('Should exit with code 0', function() {
+      chai.expect(results.code).to.eql(0);
+    });
+  });
+
   describe('Invalid file with one error and one warning (default)', function () {
 
     const ramlCop = path.join(__dirname, '..', '..', 'src', 'raml-cop.js');

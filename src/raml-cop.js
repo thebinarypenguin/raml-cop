@@ -27,24 +27,21 @@ const validate = function (filename, options) {
     .resolve()
     .then(() => {
 
-      return raml.loadRAML(filename, [], { rejectOnErrors: true });
-    })
-    .then(() => {
-
-      return { src: filename, message: 'VALID' };
+      return raml.loadRAML(filename);
     })
     .catch((err) => {
-
-      const errorsToReport = [];
-
       // Generic error
       if (!err.parserErrors) {
         err.results = [{ src: filename, message: err.message, isWarning: err.isWarning }];
         throw err;
-      }
+      } 
+    })
+    .then((ramlContent) => {
+
+      const errorsToReport = [];
 
       // RAML parser error
-      err.parserErrors.forEach((e) => {
+      ramlContent.errors().forEach((e) => {
 
         let errFilename = path.join(path.dirname(filename), e.path);
 
@@ -72,7 +69,7 @@ const validate = function (filename, options) {
       } else {
 
         return { src: filename, message: 'VALID' };
-      }
+      }   
     });
 };
 
