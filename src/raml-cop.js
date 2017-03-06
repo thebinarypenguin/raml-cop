@@ -32,7 +32,7 @@ const validate = function (filename, options) {
     .catch((err) => {
       // Generic error
       if (!err.parserErrors) {
-        err.results = [{ src: filename, message: err.message, isWarning: err.isWarning }];
+        err.results = [{ src: filename, message: err.message}];
         throw err;
       } 
     })
