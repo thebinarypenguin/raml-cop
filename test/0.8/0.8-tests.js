@@ -356,7 +356,7 @@ describe('RAML 0.8 Tests', function () {
       });
     });
 
-    it ('STDOUT should contain filename, line number, column number, and message for both error and warning', function() {
+    it ('STDOUT should contain filename, line number, column number, and message for both the warning', function() {
       chai.expect(results.stdout).to.contain(file);
       chai.expect(results.stdout).to.match(/^\[.+:[0-9]+:[0-9]+\] .+/);
     });
