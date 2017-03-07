@@ -1,0 +1,26 @@
+#%RAML 1.0
+title: One Error One Warning
+description: This document has one error and one warning
+version: v1
+protocols: HTTPS
+mediaType: application/json
+
+/hello:
+
+  get:
+    description: An example endpoint
+    responses:
+        200:
+          body:
+            application/json:
+              properties:
+                hello: string
+              example: 
+                hello: hola
+                world: mundo
+
+/world:
+
+  get:
+    description: 
+    Another example endpoint

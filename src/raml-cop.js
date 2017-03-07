@@ -18,6 +18,7 @@ const validate = function (filename, options) {
 
   const defaultOptions = {
     reportIncludeErrors: true,
+    reportWarnings: true,
   };
 
   const mergedOptions = Object.assign({}, defaultOptions, options || {});
@@ -26,24 +27,21 @@ const validate = function (filename, options) {
     .resolve()
     .then(() => {
 
-      return raml.loadRAML(filename, [], { rejectOnErrors: true });
-    })
-    .then(() => {
-
-      return { src: filename, message: 'VALID' };
+      return raml.loadRAML(filename);
     })
     .catch((err) => {
+      // Generic error
+      if (!err.parserErrors) {
+        err.results = [{ src: filename, message: err.message}];
+        throw err;
+      } 
+    })
+    .then((ramlContent) => {
 
       const errorsToReport = [];
 
-      // Generic error
-      if (!err.parserErrors) {
-        err.results = [{ src: filename, message: err.message }];
-        throw err;
-      }
-
       // RAML parser error
-      err.parserErrors.forEach((e) => {
+      ramlContent.errors().forEach((e) => {
 
         let errFilename = path.join(path.dirname(filename), e.path);
 
@@ -51,9 +49,14 @@ const validate = function (filename, options) {
           return;
         }
 
+        if (!mergedOptions.reportWarnings && e.isWarning) {
+          return;
+        }
+
         errorsToReport.push({
           src: `${errFilename}:${e.range.start.line}:${e.range.start.column}`,
           message: e.message,
+          isWarning: e.isWarning
         });
       });
 
@@ -66,7 +69,7 @@ const validate = function (filename, options) {
       } else {
 
         return { src: filename, message: 'VALID' };
-      }
+      }   
     });
 };
 
@@ -80,6 +83,7 @@ commander
   .usage('[options] <file ...>')
   .option('    --no-color', 'disable colored output')
   .option('    --no-includes', 'do not report errors for include files')
+  .option('    --no-warnings', 'do not report warnings')
   .parse(process.argv);
 
 // --no-colors option
@@ -88,6 +92,11 @@ commander
 // --no-includes options
 if (!commander.includes) {
   validationOptions.reportIncludeErrors = false;
+}
+
+// --no-warnings options
+if (!commander.warnings) {
+  validationOptions.reportWarnings = false;
 }
 
 // If there are no files to process, then display the usage message
@@ -110,7 +119,12 @@ Bluebird
 
         // Something went wrong. Display error message for each error
         err.results.forEach((e) => {
-          console.log(`[${e.src}] ${colors.red(e.message)}`);
+
+          if (e.isWarning) {
+            console.log(`[${e.src}] ${colors.yellow(e.message)}`);
+          } else {
+            console.log(`[${e.src}] ${colors.red(e.message)}`);
+          }
           errorCount++;
         });
       });
