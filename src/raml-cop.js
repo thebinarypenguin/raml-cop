@@ -82,7 +82,7 @@ commander
   .version(pkg.version)
   .usage('[options] <file ...>')
   .option('    --no-color', 'disable colored output')
-  .option('    --no-includes', 'do not report errors for include files')
+  .option('    --no-includes', 'do not report issues for include files')
   .option('    --no-warnings', 'do not report warnings')
   .parse(process.argv);
 
