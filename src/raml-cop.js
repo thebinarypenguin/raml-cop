@@ -73,7 +73,7 @@ const validate = function (filename, options) {
     });
 };
 
-let errorCount = 0;
+let issueCount = 0;
 
 const validationOptions = {}; 
 
@@ -125,14 +125,14 @@ Bluebird
           } else {
             console.log(`[${e.src}] ${colors.red(e.message)}`);
           }
-          errorCount++;
+          issueCount++;
         });
       });
   })
   .finally(() => {
     
     // If any errors occurred, return a proper error code
-    if (errorCount > 0) {
+    if (issueCount > 0) {
       process.exit(1);
     }
   });
