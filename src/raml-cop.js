@@ -32,7 +32,7 @@ const validate = function (filename, options) {
     .catch((err) => {
       // Generic error
       if (!err.parserErrors) {
-        err.results = [{ src: filename, message: err.message}];
+        err.issues = [{ src: filename, message: err.message}];
         throw err;
       } 
     })
@@ -64,7 +64,7 @@ const validate = function (filename, options) {
       if (errorsToReport.length > 0) {
         
         let ve = new Error('Validation Error');
-        ve.results = errorsToReport;
+        ve.issues = errorsToReport;
         throw ve;
       } else {
 
@@ -118,12 +118,12 @@ Bluebird
       .catch((err) => {
 
         // File is invalid. Display message for each issue.
-        err.results.forEach((e) => {
+        err.issues.forEach((issue) => {
 
-          if (e.isWarning) {
-            console.log(`[${e.src}] ${colors.yellow(e.message)}`);
+          if (issue.isWarning) {
+            console.log(`[${issue.src}] ${colors.yellow(issue.message)}`);
           } else {
-            console.log(`[${e.src}] ${colors.red(e.message)}`);
+            console.log(`[${issue.src}] ${colors.red(issue.message)}`);
           }
 
           issueCount++;
