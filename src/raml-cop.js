@@ -37,7 +37,7 @@ const validate = function (filename, options) {
     })
     .then((ramlContent) => {
 
-      const errorsToReport = [];
+      const issuesToReport = [];
 
       // RAML parser error
       ramlContent.errors().forEach((e) => {
@@ -52,7 +52,7 @@ const validate = function (filename, options) {
           return;
         }
 
-        errorsToReport.push({
+        issuesToReport.push({
           src: `${errFilename}:${e.range.start.line}:${e.range.start.column}`,
           message: e.message,
           isWarning: e.isWarning
@@ -60,10 +60,10 @@ const validate = function (filename, options) {
       });
 
       // If we have errors to report, throw an error otherwise report success
-      if (errorsToReport.length > 0) {
+      if (issuesToReport.length > 0) {
         
         let ve = new Error('Validation Error');
-        ve.issues = errorsToReport;
+        ve.issues = issuesToReport;
         throw ve;
       } else {
 
