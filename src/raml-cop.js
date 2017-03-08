@@ -17,7 +17,7 @@ const pkg       = require('../package.json');
 const validate = function (filename, options) {
 
   const defaultOptions = {
-    reportIncludeErrors: true,
+    reportIncludes: true,
     reportWarnings: true,
   };
 
@@ -45,7 +45,7 @@ const validate = function (filename, options) {
 
         let errFilename = path.join(path.dirname(filename), e.path);
 
-        if (!mergedOptions.reportIncludeErrors && errFilename !== filename) {
+        if (!mergedOptions.reportIncludes && errFilename !== filename) {
           return;
         }
 
@@ -91,7 +91,7 @@ commander
 
 // --no-includes option
 if (!commander.includes) {
-  validationOptions.reportIncludeErrors = false;
+  validationOptions.reportIncludes = false;
 }
 
 // --no-warnings option
