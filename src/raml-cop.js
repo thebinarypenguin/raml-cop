@@ -39,36 +39,36 @@ const validate = function (filename, options) {
 
       const issuesToReport = [];
 
-      // RAML parser error
-      ramlContent.errors().forEach((e) => {
+      // Check ramlContent for issues
+      ramlContent.errors().forEach((issue) => {
 
-        let errFilename = path.join(path.dirname(filename), e.path);
+        let name = path.join(path.dirname(filename), issue.path);
 
-        if (!mergedOptions.reportIncludes && errFilename !== filename) {
+        if (!mergedOptions.reportIncludes && name !== filename) {
           return;
         }
 
-        if (!mergedOptions.reportWarnings && e.isWarning) {
+        if (!mergedOptions.reportWarnings && issue.isWarning) {
           return;
         }
 
         issuesToReport.push({
-          src: `${errFilename}:${e.range.start.line}:${e.range.start.column}`,
-          message: e.message,
-          isWarning: e.isWarning
+          src: `${name}:${issue.range.start.line}:${issue.range.start.column}`,
+          message: issue.message,
+          isWarning: issue.isWarning,
         });
       });
 
-      // If we have errors to report, throw an error otherwise report success
+      // If we have issues to report, throw an error containing those issues
       if (issuesToReport.length > 0) {
         
         let ve = new Error('Validation Error');
         ve.issues = issuesToReport;
         throw ve;
-      } else {
+      }
 
-        return { src: filename, message: 'VALID' };
-      }   
+      // Otherwise the file is valid
+      return { src: filename, message: 'VALID' };   
     });
 };
 
