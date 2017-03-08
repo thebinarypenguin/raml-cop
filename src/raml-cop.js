@@ -89,12 +89,12 @@ commander
 // --no-colors option
   // (handled automagically by colors module)
 
-// --no-includes options
+// --no-includes option
 if (!commander.includes) {
   validationOptions.reportIncludeErrors = false;
 }
 
-// --no-warnings options
+// --no-warnings option
 if (!commander.warnings) {
   validationOptions.reportWarnings = false;
 }
