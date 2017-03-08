@@ -112,12 +112,12 @@ Bluebird
     return validate(file, validationOptions)
       .then((result) => {
 
-        // File is valid
+        // File is valid. Display success message.
         console.log(`[${result.src}] ${colors.green(result.message)}`);
       })
       .catch((err) => {
 
-        // Something went wrong. Display error message for each error
+        // File is invalid. Display message for each issue.
         err.results.forEach((e) => {
 
           if (e.isWarning) {
@@ -125,13 +125,14 @@ Bluebird
           } else {
             console.log(`[${e.src}] ${colors.red(e.message)}`);
           }
+
           issueCount++;
         });
       });
   })
   .finally(() => {
     
-    // If any errors occurred, return a proper error code
+    // If any issues occurred, return a proper status code
     if (issueCount > 0) {
       process.exit(1);
     }
