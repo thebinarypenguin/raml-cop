@@ -27,14 +27,13 @@ const validate = function (filename, options) {
     .resolve()
     .then(() => {
 
-      return raml.loadRAML(filename);
-    })
-    .catch((err) => {
-      // Generic error
-      if (!err.parserErrors) {
+      // Parse file
+      return raml.loadRAML(filename).catch((err) => {
+        
+        // Generic error
         err.issues = [{ src: filename, message: err.message}];
         throw err;
-      } 
+      });
     })
     .then((ramlContent) => {
 
