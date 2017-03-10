@@ -44,9 +44,9 @@ describe('RAML 1.0 Tests', function () {
       });
     });
 
-    it ('STDOUT should contain filename, line number, column number, and message', function() {
+    it ('STDOUT should contain filename, line number, column number, "ERROR", and message', function() {
       chai.expect(results.stdout).to.contain(file);
-      chai.expect(results.stdout).to.match(/^\[.+:[0-9]+:[0-9]+\] .+/);
+      chai.expect(results.stdout).to.match(/^\[.+:[0-9]+:[0-9]+\] ERROR .+/);
     });
 
     it ('STDERR should be empty', function() {
@@ -75,9 +75,9 @@ describe('RAML 1.0 Tests', function () {
       });
     });
 
-    it ('STDOUT should contain filename, line number, column number, and message for each error', function() {
+    it ('STDOUT should contain filename, line number, column number, "ERROR" and message for each error', function() {
       chai.expect(results.stdout).to.contain(file);
-      chai.expect(results.stdout).to.match(/^\[.+:[0-9]+:[0-9]+\] .+\r?\n\[.+:[0-9]+:[0-9]+\] .+/);
+      chai.expect(results.stdout).to.match(/^\[.+:[0-9]+:[0-9]+\] ERROR .+\r?\n\[.+:[0-9]+:[0-9]+\] ERROR .+/);
     });
 
     it ('STDERR should be empty', function() {
@@ -137,9 +137,9 @@ describe('RAML 1.0 Tests', function () {
       });
     });
 
-    it ('STDOUT should contain filename, line number, column number, and message', function() {
+    it ('STDOUT should contain filename, line number, column number, "ERROR", and message', function() {
       chai.expect(results.stdout).to.contain(file);
-      chai.expect(results.stdout).to.match(/^\[.+:[0-9]+:[0-9]+\] .+/);
+      chai.expect(results.stdout).to.match(/^\[.+:[0-9]+:[0-9]+\] ERROR .+/);
     });
 
     it ('STDERR should be empty', function() {
@@ -169,9 +169,9 @@ describe('RAML 1.0 Tests', function () {
       });
     });
 
-    it ('STDOUT should contain include filename, line number, column number, and message', function() {
+    it ('STDOUT should contain include filename, line number, column number, "ERROR", and message', function() {
       chai.expect(results.stdout).to.contain(includeFile);
-      chai.expect(results.stdout).to.match(/^\[.+:[0-9]+:[0-9]+\] .+/);
+      chai.expect(results.stdout).to.match(/^\[.+:[0-9]+:[0-9]+\] ERROR .+/);
     });
 
     it ('STDERR should be empty', function() {
@@ -236,9 +236,9 @@ describe('RAML 1.0 Tests', function () {
       });
     });
 
-    it ('STDOUT should filename and message', function() {
+    it ('STDOUT should contain filename, "ERROR", and message', function() {
       chai.expect(results.stdout).to.contain(file);
-      chai.expect(results.stdout).to.match(/^\[.+\] .+/);
+      chai.expect(results.stdout).to.match(/^\[.+\] ERROR .+/);
     });
 
     it ('STDERR should be empty', function() {
@@ -267,9 +267,9 @@ describe('RAML 1.0 Tests', function () {
       });
     });
 
-    it ('STDOUT should filename and message', function() {
+    it ('STDOUT should contain filename, "ERROR", and message', function() {
       chai.expect(results.stdout).to.contain(file);
-      chai.expect(results.stdout).to.match(/^\[.+\] .+/);
+      chai.expect(results.stdout).to.match(/^\[.+\] ERROR .+/);
     });
 
     it ('STDERR should be empty', function() {
@@ -297,7 +297,7 @@ describe('RAML 1.0 Tests', function () {
       });
     });
 
-    it ('STDOUT should help text', function() {
+    it ('STDOUT should be help text', function() {
       chai.expect(results.stdout).to.contain('Usage: raml-cop');
     });
 
@@ -356,9 +356,9 @@ describe('RAML 1.0 Tests', function () {
       });
     });
 
-    it ('STDOUT should contain filename, line number, column number, and message for the warning', function() {
+    it ('STDOUT should contain filename, line number, column number, "WARNING", and message', function() {
       chai.expect(results.stdout).to.contain(file);
-      chai.expect(results.stdout).to.match(/^\[.+:[0-9]+:[0-9]+\] .+/);
+      chai.expect(results.stdout).to.match(/^\[.+:[0-9]+:[0-9]+\] WARNING .+/);
     });
 
     it ('STDERR should be empty', function() {
@@ -418,9 +418,9 @@ describe('RAML 1.0 Tests', function () {
       });
     });
 
-    it ('STDOUT should contain filename, line number, column number, and message for both error and warning', function() {
+    it ('STDOUT should contain filename, line number, column number, (ERROR|WARNING), and message for both the error and the warning', function() {
       chai.expect(results.stdout).to.contain(file);
-      chai.expect(results.stdout).to.match(/^\[.+:[0-9]+:[0-9]+\] .+\r?\n\[.+:[0-9]+:[0-9]+\] .+/);
+      chai.expect(results.stdout).to.match(/^\[.+:[0-9]+:[0-9]+\] ERROR .+\r?\n\[.+:[0-9]+:[0-9]+\] WARNING .+/);
     });
 
     it ('STDERR should be empty', function() {
@@ -449,9 +449,9 @@ describe('RAML 1.0 Tests', function () {
       });
     });
 
-    it ('STDOUT should contain filename, line number, column number, and message only for error', function() {
+    it ('STDOUT should contain filename, line number, column number, "ERROR", and message', function() {
       chai.expect(results.stdout).to.contain(file);
-      chai.expect(results.stdout).to.match(/^\[.+:[0-9]+:[0-9]+\] .+/);
+      chai.expect(results.stdout).to.match(/^\[.+:[0-9]+:[0-9]+\] ERROR .+/);
     });
 
     it ('STDERR should be empty', function() {

@@ -17,7 +17,7 @@ const pkg       = require('../package.json');
 const validate = function (filename, options) {
 
   const defaultOptions = {
-    reportIncludeErrors: true,
+    reportIncludes: true,
     reportWarnings: true,
   };
 
@@ -27,53 +27,52 @@ const validate = function (filename, options) {
     .resolve()
     .then(() => {
 
-      return raml.loadRAML(filename);
-    })
-    .catch((err) => {
-      // Generic error
-      if (!err.parserErrors) {
-        err.results = [{ src: filename, message: err.message}];
+      // Parse file
+      return raml.loadRAML(filename).catch((err) => {
+        
+        // Generic error
+        err.issues = [{ src: filename, message: err.message}];
         throw err;
-      } 
+      });
     })
     .then((ramlContent) => {
 
-      const errorsToReport = [];
+      const issuesToReport = [];
 
-      // RAML parser error
-      ramlContent.errors().forEach((e) => {
+      // Check ramlContent for issues
+      ramlContent.errors().forEach((issue) => {
 
-        let errFilename = path.join(path.dirname(filename), e.path);
+        let name = path.join(path.dirname(filename), issue.path);
 
-        if (!mergedOptions.reportIncludeErrors && errFilename !== filename) {
+        if (!mergedOptions.reportIncludes && name !== filename) {
           return;
         }
 
-        if (!mergedOptions.reportWarnings && e.isWarning) {
+        if (!mergedOptions.reportWarnings && issue.isWarning) {
           return;
         }
 
-        errorsToReport.push({
-          src: `${errFilename}:${e.range.start.line}:${e.range.start.column}`,
-          message: e.message,
-          isWarning: e.isWarning
+        issuesToReport.push({
+          src: `${name}:${issue.range.start.line}:${issue.range.start.column}`,
+          message: issue.message,
+          isWarning: issue.isWarning,
         });
       });
 
-      // If we have errors to report, throw an error otherwise report success
-      if (errorsToReport.length > 0) {
+      // If we have issues to report, throw an error containing those issues
+      if (issuesToReport.length > 0) {
         
         let ve = new Error('Validation Error');
-        ve.results = errorsToReport;
+        ve.issues = issuesToReport;
         throw ve;
-      } else {
+      }
 
-        return { src: filename, message: 'VALID' };
-      }   
+      // Otherwise the file is valid
+      return { src: filename, message: 'VALID' };   
     });
 };
 
-let errorCount = 0;
+let issueCount = 0;
 
 const validationOptions = {}; 
 
@@ -82,19 +81,19 @@ commander
   .version(pkg.version)
   .usage('[options] <file ...>')
   .option('    --no-color', 'disable colored output')
-  .option('    --no-includes', 'do not report errors for include files')
+  .option('    --no-includes', 'do not report issues for include files')
   .option('    --no-warnings', 'do not report warnings')
   .parse(process.argv);
 
 // --no-colors option
   // (handled automagically by colors module)
 
-// --no-includes options
+// --no-includes option
 if (!commander.includes) {
-  validationOptions.reportIncludeErrors = false;
+  validationOptions.reportIncludes = false;
 }
 
-// --no-warnings options
+// --no-warnings option
 if (!commander.warnings) {
   validationOptions.reportWarnings = false;
 }
@@ -112,27 +111,28 @@ Bluebird
     return validate(file, validationOptions)
       .then((result) => {
 
-        // File is valid
+        // File is valid. Display success message.
         console.log(`[${result.src}] ${colors.green(result.message)}`);
       })
       .catch((err) => {
 
-        // Something went wrong. Display error message for each error
-        err.results.forEach((e) => {
+        // File is invalid. Display message for each issue.
+        err.issues.forEach((issue) => {
 
-          if (e.isWarning) {
-            console.log(`[${e.src}] ${colors.yellow(e.message)}`);
+          if (issue.isWarning) {
+            console.log(`[${issue.src}] ${colors.yellow('WARNING')} ${colors.yellow(issue.message)}`);
           } else {
-            console.log(`[${e.src}] ${colors.red(e.message)}`);
+            console.log(`[${issue.src}] ${colors.red('ERROR')} ${colors.red(issue.message)}`);
           }
-          errorCount++;
+
+          issueCount++;
         });
       });
   })
   .finally(() => {
     
-    // If any errors occurred, return a proper error code
-    if (errorCount > 0) {
+    // If any issues occurred, return a proper status code
+    if (issueCount > 0) {
       process.exit(1);
     }
   });
