@@ -120,9 +120,9 @@ Bluebird
         err.issues.forEach((issue) => {
 
           if (issue.isWarning) {
-            console.log(`[${issue.src}] ${colors.yellow(issue.message)}`);
+            console.log(`[${issue.src}] ${colors.yellow('WARNING')} ${colors.yellow(issue.message)}`);
           } else {
-            console.log(`[${issue.src}] ${colors.red(issue.message)}`);
+            console.log(`[${issue.src}] ${colors.red('ERROR')} ${colors.red(issue.message)}`);
           }
 
           issueCount++;
